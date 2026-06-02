@@ -1,0 +1,1197 @@
+definitions:
+  internal_controllers.AssignMenuRequest:
+    properties:
+      can_create:
+        type: boolean
+      can_delete:
+        type: boolean
+      can_edit:
+        type: boolean
+      can_view:
+        type: boolean
+    type: object
+  internal_controllers.AssignRoleRequest:
+    properties:
+      role_id:
+        type: string
+    required:
+    - role_id
+    type: object
+  internal_controllers.CreateMenuRequest:
+    properties:
+      icon:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      parent_id:
+        type: string
+      path:
+        type: string
+      sort_order:
+        type: integer
+    required:
+    - name
+    type: object
+  internal_controllers.CreatePermissionRequest:
+    properties:
+      action:
+        maxLength: 50
+        minLength: 2
+        type: string
+      description:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 3
+        type: string
+      resource:
+        maxLength: 100
+        minLength: 2
+        type: string
+    required:
+    - action
+    - name
+    - resource
+    type: object
+  internal_controllers.CreateRoleRequest:
+    properties:
+      description:
+        type: string
+      display_name:
+        maxLength: 100
+        minLength: 3
+        type: string
+      name:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - display_name
+    - name
+    type: object
+  internal_controllers.ForgotPasswordRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  internal_controllers.ResetPasswordRequest:
+    properties:
+      new_password:
+        minLength: 6
+        type: string
+      token:
+        type: string
+    required:
+    - new_password
+    - token
+    type: object
+  internal_controllers.UpdateMenuRequest:
+    properties:
+      icon:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      parent_id:
+        type: string
+      path:
+        type: string
+      sort_order:
+        type: integer
+    required:
+    - name
+    type: object
+  internal_controllers.UpdateRoleRequest:
+    properties:
+      description:
+        type: string
+      display_name:
+        maxLength: 100
+        minLength: 3
+        type: string
+      is_active:
+        type: boolean
+    required:
+    - display_name
+    type: object
+  internal_controllers.ValidateTokenRequest:
+    properties:
+      token:
+        type: string
+    required:
+    - token
+    type: object
+  user-management_internal_models.CreateUserRequest:
+    properties:
+      department:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      nik:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phone:
+        type: string
+      position:
+        type: string
+      role:
+        enum:
+        - admin
+        - supervisor
+        - warehouse_operator
+        - viewer
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - role
+    type: object
+  user-management_internal_models.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  user-management_internal_models.LoginResponse:
+    properties:
+      expires_at:
+        type: string
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/user-management_internal_models.UserResponse'
+    type: object
+  user-management_internal_models.UpdateUserRequest:
+    properties:
+      department:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      nik:
+        type: string
+      phone:
+        type: string
+      position:
+        type: string
+      role:
+        enum:
+        - admin
+        - supervisor
+        - warehouse_operator
+        - viewer
+        type: string
+      username:
+        type: string
+    type: object
+  user-management_internal_models.UserResponse:
+    properties:
+      created_at:
+        type: string
+      department:
+        type: string
+      email:
+        type: string
+      is_active:
+        type: boolean
+      last_login_at:
+        type: string
+      name:
+        type: string
+      nik:
+        type: string
+      phone:
+        type: string
+      position:
+        type: string
+      role:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+  user-management_internal_utils.Response:
+    properties:
+      code:
+        type: string
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Email
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controllers.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      summary: Forgot password
+      tags:
+      - Password Reset
+  /api/v1/auth/history:
+    get:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - default: 20
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get my login history
+      tags:
+      - Login History
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user-management_internal_models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user-management_internal_utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/user-management_internal_models.LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      summary: User login
+      tags:
+      - Auth
+  /api/v1/auth/logout:
+    post:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: User logout
+      tags:
+      - Auth
+  /api/v1/auth/me:
+    get:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user-management_internal_utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/user-management_internal_models.UserResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get current user info
+      tags:
+      - Auth
+  /api/v1/auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token and new password
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controllers.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      summary: Reset password
+      tags:
+      - Password Reset
+  /api/v1/auth/validate-reset-token:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controllers.ValidateTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      summary: Validate reset token
+      tags:
+      - Password Reset
+  /api/v1/login-history:
+    get:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by email
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all login history
+      tags:
+      - Login History
+  /api/v1/menus:
+    get:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all menus
+      tags:
+      - Menus
+    post:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Menu data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controllers.CreateMenuRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create menu
+      tags:
+      - Menus
+  /api/v1/menus/{id}:
+    delete:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Menu ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete menu
+      tags:
+      - Menus
+    put:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Menu ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Menu data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controllers.UpdateMenuRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update menu
+      tags:
+      - Menus
+  /api/v1/menus/tree:
+    get:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get menu tree
+      tags:
+      - Menus
+  /api/v1/menus/user:
+    get:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user menus
+      tags:
+      - Menus
+  /api/v1/permissions:
+    get:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all permissions
+      tags:
+      - Permissions
+    post:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Permission data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controllers.CreatePermissionRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create permission
+      tags:
+      - Permissions
+  /api/v1/roles:
+    get:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all roles
+      tags:
+      - Roles
+    post:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Role data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controllers.CreateRoleRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create role
+      tags:
+      - Roles
+  /api/v1/roles/{roleId}:
+    delete:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete role
+      tags:
+      - Roles
+    get:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get role by ID
+      tags:
+      - Roles
+    put:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      - description: Role data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controllers.UpdateRoleRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update role
+      tags:
+      - Roles
+  /api/v1/roles/{roleId}/menus:
+    get:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get menus by role
+      tags:
+      - Menus
+  /api/v1/roles/{roleId}/menus/{menuId}:
+    delete:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      - description: Menu ID
+        in: path
+        name: menuId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Remove menu from role
+      tags:
+      - Menus
+    post:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      - description: Menu ID
+        in: path
+        name: menuId
+        required: true
+        type: string
+      - description: Menu permissions
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controllers.AssignMenuRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Assign menu to role
+      tags:
+      - Menus
+  /api/v1/roles/{roleId}/permissions:
+    get:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get permissions by role
+      tags:
+      - Permissions
+  /api/v1/roles/{roleId}/permissions/{permissionId}:
+    delete:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      - description: Permission ID
+        in: path
+        name: permissionId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Remove permission from role
+      tags:
+      - Permissions
+    post:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      - description: Permission ID
+        in: path
+        name: permissionId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Assign permission to role
+      tags:
+      - Permissions
+  /api/v1/users:
+    get:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by email or name
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user-management_internal_utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/user-management_internal_models.UserResponse'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all users
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: User data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user-management_internal_models.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create user
+      tags:
+      - Users
+  /api/v1/users/{userId}:
+    delete:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete user (soft delete)
+      tags:
+      - Users
+    get:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user by ID
+      tags:
+      - Users
+    put:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: Update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user-management_internal_models.UpdateUserRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update user
+      tags:
+      - Users
+  /api/v1/users/{userId}/roles:
+    get:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user's roles
+      tags:
+      - Users
+    post:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: Role ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controllers.AssignRoleRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Assign role to user
+      tags:
+      - Users
+  /api/v1/users/{userId}/roles/{roleId}:
+    delete:
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user-management_internal_utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Remove role from user
+      tags:
+      - Users
+swagger: "2.0"
